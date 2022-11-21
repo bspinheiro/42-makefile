@@ -6,7 +6,7 @@
 #    By: bda-silv <bda-silv@student.42.rio>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/10/24 16:48:08 by bda-silv          #+#    #+#              #
-#*   Updated: 2022/11/21 18:58:14 by                  ###   ########.fr       *#
+#*   Updated: 2022/11/21 19:26:08 by                  ###   ########.fr       *#
 #                                                                              #
 # **************************************************************************** #
 #
@@ -53,8 +53,8 @@ ifeq (debug,$(firstword $(MAKECMDGOALS)))
   RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
   $(eval $(RUN_ARGS):;@:)
 endif
-ifdef PRJ
- PROJ = $(PRJ)
+ifndef FLDR
+ FLDR = $(shell echo $(PWD) | rev | cut -d'/' -f1 | rev)
 endif
 
 #.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. RULES .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
@@ -125,12 +125,12 @@ boilerplate: gig
 	$(MD) inc src lib
 	echo "$(ora)$(ck)	Creating		libraries$(ora)" ; \
 	cp -Rf ../.boilerplate/libs/ . 2>/dev/null
-	touch ./src/$(PROJ).c && touch ./inc/$(PROJ).h
+	touch ./src/$(FLDR).c && touch ./inc/$(FLDR).h
 	echo "$(ora)$(ck)	Creating		gitmirror$(rst)" ; \
-	git remote set-url --add origin git@github.com:bspinheiro/42-$(PROJ).git
-	gh repo create 42-$(PROJ) --private --source=. --remote=github
+	git remote set-url --add origin git@github.com:bspinheiro/42-$(FLDR).git
+	gh repo create 42-$(FLDR) --private --source=. --remote=github
 	git add .
-	git commit -m "$(PROJ): Boilerplate"
+	git commit -m "$(FLDR): Boilerplate"
 	git push origin master
 	echo "$(grn)$(ok)	Boilerplate		DONE!$(rst)" ; \
 
