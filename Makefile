@@ -6,7 +6,7 @@
 #    By: bda-silv <bda-silv@student.42.rio>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/10/24 16:48:08 by bda-silv          #+#    #+#              #
-#*   Updated: 2022/11/21 17:22:54 by                  ###   ########.fr       *#
+#*   Updated: 2022/11/21 18:58:14 by                  ###   ########.fr       *#
 #                                                                              #
 # **************************************************************************** #
 #
@@ -52,6 +52,9 @@ endif
 ifeq (debug,$(firstword $(MAKECMDGOALS)))
   RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
   $(eval $(RUN_ARGS):;@:)
+endif
+ifdef PRJ
+ PROJ = $(PRJ)
 endif
 
 #.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. RULES .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
