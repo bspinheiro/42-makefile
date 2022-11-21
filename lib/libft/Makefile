@@ -6,33 +6,33 @@
 #    By: bda-silv <bda-silv@student.42.rio>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/10/24 16:48:08 by bda-silv          #+#    #+#              #
-#*   Updated: 2022/11/21 14:44:11 by                  ###   ########.fr       *#
+#*   Updated: 2022/11/21 08:52:02 by                  ###   ########.fr       *#
 #                                                                              #
 # **************************************************************************** #
 #
 #.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. SPECS .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
 
-PROJ				=	push_swap
+PROJ				=	libft
+EXEC				=	main
 
 SRCS_DIR			=	./src/
 OBJS_DIR			=	./obj/
 INCS_DIR			=	./inc/
-LIBS_DIR			=	./lib/
+LIBS_DIR			=	..
 
 #.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. SETUP .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
 
-LIBS_NAME			=	$(shell cd $(LIBS_DIR); ls -d */)
-LIBS_PATH			=	$(addprefix $(LIBS_DIR), $(LIBS_NAME))
 SRCS_NAME			=	$(shell ls $(SRCS_DIR) | grep -E ".+\.c")
-SRCS				=	$(addprefix $(SRCS_DIR), $(SRCS_NAME))
-OBJS				=	$(addprefix $(OBJS_DIR), $(SRCS_NAME:.c=.o))
-LIBS				=	$(addsuffix $(LIBS_NAME:/=).a, $(LIBS_PATH))
-SRC					=	$(SRCS_NAME:.c=)
-NAME				=	$(SRC)
+SRCS				=	$(addprefix $(SRCDIR), $(SRCS_NAME))
+OBJS				=	$(addprefix $(OBJS_DIR), $(SRCS:.c=.o))
+NAME				=	$(addsuffix .a, $(PROJ))
+
 
 CC					=	cc
-CFLAGS				=	-Wall -Wextra -Werror -g
+CFLAGS				=	-Wall -Wextra -Werror
 CPPFLAGS			=	-g
+CFILES				=	$(shell ls -a . | grep -E ".+\.c")
+CEXEC				=	$(addsuffix .out, $(EXEC))
 
 MD					=	mkdir -p
 AR					=	ar rcs
@@ -56,7 +56,7 @@ endif
 
 #.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. RULES .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
 
-all : $(OBJS_DIR) $(LIBS) $(NAME)
+all : $(OBJS_DIR) $(NAME)
 
 $(OBJS_DIR) :
 	$(MD) $(OBJS_DIR)
@@ -65,45 +65,45 @@ $(OBJS_DIR)%.o : $(SRCS_DIR)%.c
 	@echo "$(ora)$(ck)	Creating		$@$(rst)"
 	$(CC) $(CFLAGS) -I$(INCS_DIR) -o $@ -c $<
 
-$(LIBS) :
-	$(MAKE) -C $(LIBS_PATH)
-
-$(NAME) : $(OBJS) $(LIBS)
-	-$(CC) $(CFLAGS) $(LIBS) -o $@ $(addprefix $(OBJS_DIR), $@.o)
+$(NAME) : $(OBJS)
+	$(AR) $(NAME) $(OBJS)
+	$(RL) $(NAME)
 	@echo "$(grn)$(ok)	Compiled		$@$(rst)"
 
 clean :
-	$(MAKE) $@ -C $(LIBS_PATH)
 	$(RM) $(OBJS_DIR)
 	@echo "$(red)$(ko)	Removing		$(OBJS_DIR)$(rst)"
 
-fclean :
-	$(MAKE) $@ -C $(LIBS_PATH)
-	$(RM) $(SRC) $(OBJS_DIR)
-	@echo "$(red)$(ko)	Removing		$(SRC)$(rst)"
+fclean : clean
+	$(RM) $(NAME)
+	@echo "$(red)$(ko)	Removing		$(NAME)$(rst)"
 
 re : fclean all
 
 norm :
-	@echo "$(pnk)\c"; \
+	@echo "$(pnk)"
 	norminette | grep "Error" || echo "$(grn)$(ok)	Norminette		OK!"
 
-run : all
-	@echo "$(grn)$(ok)	Running			$(RUN_ARGS)$(rst)\n"
-	./$(RUN_ARGS); echo "$(rst)"
+comp : all
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(CFILES) $(NAME) -o $(CEXEC)
+	@echo "$(grn)$(ok)	Compiled		$(CEXEC)$(rst)"
 
-debug :
+run : comp
+	@echo "$(grn)$(ok)	Running			$(CEXEC)$(rst)"
+	./$(CEXEC) $(RUN_ARGS); echo "$(cya)\n"
+
+debug : leaks
 	@echo "$(pnk)"
-	lldb $(RUN_ARGS)
+	lldb $(CEXEC) $(RUN_ARGS)
 
 leaks :
 	valgrind --leak-check=full --show-leak-kinds=all --trace-children=yes \
-	$(addprefix ./, $(RUN_ARGS))
+	$(addprefix ./, $(CEXEC)) $(RUN_ARGS)
 
 gig :
 	if [ -f '.gitignore' ]; \
 	then \
-		echo "$(grn)$(ok)	.gitignore		OK!$(ora)$(rst)" ; \
+		echo "$(grn)$(ok)	.gitignore		OK!$(ora)" ; \
 	else \
 		echo "$(ora)$(ck)	Creating		.gitignore$(ora)" ; \
 		echo ".*" >> .gitignore ; \
@@ -112,38 +112,20 @@ gig :
 		echo "*.out" >> .gitignore ; \
 		echo "*.dSYM" >> .gitignore ; \
 		echo ".DS_Store" >> .gitignore ; \
-		echo "checker_Mac" >> .gitignore ; \
-		echo "push_swap" >> .gitignore ; \
 		cat -n .gitignore ; \
 	fi
 
-boilerplate: gig
-	echo "$(ora)$(ck)	Creating		directory$(ora)" ; \
-	$(MD) inc src lib
-	echo "$(ora)$(ck)	Creating		libraries$(ora)" ; \
-	cp -Rf ../.boilerplate/ . 2>/dev/null
-	echo "$(ora)$(ck)	Creating		gitmirror$(rst)" ; \
-	git remote set-url --add origin git@github.com:bspinheiro/42-$(PROJ).git
-	gh repo create 42-$(PROJ) --private --source=. --remote=github
-	git add .
-	git commit -m "$(PROJ): Boilerplate"
-	git push origin master
-	echo "$(grn)$(ok)	Boilerplate		DONE!$(rst)" ; \
-
-ready:
-	-mv main.c .main.c 2>/dev/null \
-	&& echo "$(ora)$(ck)	Creating		.main.c" \
-	|| echo "$(red)$(ko)	Skipping		.main.c"
+ready : norm gig
+	test -f main.c && mv main.c .main.c \
+	|| echo "$(ora)$(ck)	Skipping		main.c"
 	$(RM) *.o *.a *.out *.dSYM .DS_Store
-	@echo "$(red)$(ko)	Removing		dSYMs$(rst)"
-	-for f in *; do if [ $$f != 'Makefile' ]; then rm $$f 2>/dev/null; fi; done
-	@echo "$(red)$(ko)	Removing		files$(rst)"
-	$(MAKE) fclean gig norm
+	$(MAKE) fclean
+	@echo "$(grn)$(ok)	Delivery		DONE!"
 
 rainbow :
 	@echo "$(red)R$(grn)A$(yel)I$(blu)N$(pnk)B$(cya)O$(wht)W$(rst)"
 
-.PHONY : all clean fclean re norm gig run debug leaks ready rainbow boilerplate
+.PHONY : all clean fclean re norm gig comp ready debug leaks rainbow run
 
 #.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*. VERBOSE .*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.*.
 
