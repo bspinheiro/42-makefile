@@ -6,7 +6,7 @@
 #    By: bda-silv <bda-silv@student.42.rio>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/10/24 16:48:08 by bda-silv          #+#    #+#              #
-#*   Updated: 2022/11/21 15:03:12 by                  ###   ########.fr       *#
+#*   Updated: 2022/11/21 15:07:05 by                  ###   ########.fr       *#
 #                                                                              #
 # **************************************************************************** #
 #
@@ -121,8 +121,7 @@ boilerplate: gig
 	echo "$(ora)$(ck)	Creating		directory$(ora)" ; \
 	$(MD) inc src lib
 	echo "$(ora)$(ck)	Creating		libraries$(ora)" ; \
-	cp -Rf ../.boilerplate/ . 2>/dev/null
-	$(RM) .git
+	cp -Rf ../.boilerplate/libs/ . 2>/dev/null
 	echo "$(ora)$(ck)	Creating		gitmirror$(rst)" ; \
 	git remote set-url --add origin git@github.com:bspinheiro/42-$(PROJ).git
 	gh repo create 42-$(PROJ) --private --source=. --remote=github
